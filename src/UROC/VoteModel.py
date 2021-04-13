@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 class VoteModel:
-    '''
+    """
     Summary:
         Optimization algorithm using voting methods
 
@@ -34,25 +34,25 @@ class VoteModel:
 
         -Implement Coombs Rule
 
-    '''
+    """
 
     def __init__(
-            self,
-            nk_model=None,
-            solutions=None,
-            possible_vote_indices=None,
-            vote_size=2,
-            vote_type='plurality'
+        self,
+        nk_model=None,
+        solutions=None,
+        possible_vote_indices=None,
+        vote_size=2,
+        vote_type="plurality",
     ):
-        if (nk_model is None):
-            raise ValueError('An NKLandscape model must be provided')
+        if nk_model is None:
+            raise ValueError("An NKLandscape model must be provided")
         self.nk = nk_model
 
-        if (solutions is None):
-            raise ValueError('A set of voting solutions must be provided')
-        self.solutions = solutions
+        if solutions is None:
+            raise ValueError("A set of voting solutions must be provided")
+        self.solutions = np.copy(solutions)
 
-        if (possible_vote_indices is None):
+        if possible_vote_indices is None:
             self.possible_vote_indices = np.arange(self.nk.N)
         else:
             self.possible_vote_indices = possible_vote_indices
@@ -73,7 +73,9 @@ class VoteModel:
                 proposed_solution = np.copy(solution)
                 np.put(proposed_solution, proposal_indices, binary_proposal)
 
-                proposal_fitnesses[i, proposal] = self.nk.calculate_fitness(proposed_solution)
+                proposal_fitnesses[i, proposal] = self.nk.calculate_fitness(
+                    proposed_solution
+                )
 
         return proposal_fitnesses
 
@@ -92,16 +94,18 @@ class VoteModel:
         return decimal
 
     def _determine_winner(self, proposal_fitnesses):
-        if (self.vote_type == 'plurality'):
+        if self.vote_type == "plurality":
             tally = np.zeros(2 ** self.vote_size)
             for i in range(self.num_solutions):
-                vote = np.argwhere(proposal_fitnesses[i] == np.max(proposal_fitnesses[i]))[0]
+                vote = np.argwhere(
+                    proposal_fitnesses[i] == np.max(proposal_fitnesses[i])
+                )[0]
                 tally[vote[0]] += 1
             print(tally)
             decimal_winner = np.argwhere(tally == np.max(tally))[0][0]
             binary_winner = self._decimal_to_binary(decimal_winner, self.vote_size)
 
-        elif (self.vote_type == 'approval'):
+        elif self.vote_type == "approval":
             tally = np.zeros(2 ** self.vote_size)
             current_fitnesses = self.get_fitnesses()
             for i in range(self.num_solutions):
@@ -110,15 +114,19 @@ class VoteModel:
                 if len(votes[0]) > 0:
                     tally[votes[0]] += 1
                 else:
-                    self_vote = np.argwhere(proposal_fitnesses[i] == current_fitnesses[i]).T
+                    self_vote = np.argwhere(
+                        proposal_fitnesses[i] == current_fitnesses[i]
+                    ).T
                     tally[self_vote[0]] += 1
 
             decimal_winner = np.argwhere(tally == np.max(tally))[0][0]
             binary_winner = self._decimal_to_binary(decimal_winner, self.vote_size)
 
-        elif (self.vote_type == 'ranked'):  # This is where new code started
+        elif self.vote_type == "ranked":  # This is where new code started
             current_fitnesses = self.get_fitnesses()[np.newaxis].T
-            marginal_scores = proposal_fitnesses - np.tile(current_fitnesses, 2 ** self.vote_size)
+            marginal_scores = proposal_fitnesses - np.tile(
+                current_fitnesses, 2 ** self.vote_size
+            )
             scores = np.sort(marginal_scores, axis=1)
             # Implement Borda Rule here
 
@@ -127,28 +135,40 @@ class VoteModel:
 
         # A version of score that is most similar to actual score voting (actually more like cumulative voting).
         # Each solution has the same amount of score (1) to alot to the proposals
-        elif (self.vote_type == 'normalized_score'):
-            minimum_proposal_fitnesses = np.min(proposal_fitnesses, axis=1)[np.newaxis].T
-            minimum_proposal_fitnesses = np.tile(minimum_proposal_fitnesses, 2 ** self.vote_size)
-            positive_proposal_fitnesses = proposal_fitnesses - minimum_proposal_fitnesses
+        elif self.vote_type == "normalized_score":
+            minimum_proposal_fitnesses = np.min(proposal_fitnesses, axis=1)[
+                np.newaxis
+            ].T
+            minimum_proposal_fitnesses = np.tile(
+                minimum_proposal_fitnesses, 2 ** self.vote_size
+            )
+            positive_proposal_fitnesses = (
+                proposal_fitnesses - minimum_proposal_fitnesses
+            )
 
-            normalizing_factors = np.sum(positive_proposal_fitnesses, axis=1)[np.newaxis].T
+            normalizing_factors = np.sum(positive_proposal_fitnesses, axis=1)[
+                np.newaxis
+            ].T
             normalizing_factors = np.tile(normalizing_factors, 2 ** self.vote_size)
-            normalized_scores = np.divide(positive_proposal_fitnesses, normalizing_factors)
+            normalized_scores = np.divide(
+                positive_proposal_fitnesses, normalizing_factors
+            )
 
             scores = np.sum(normalized_scores, axis=0)
             decimal_winner = np.argwhere(scores == np.max(scores))[0][0]
             binary_winner = self._decimal_to_binary(decimal_winner, self.vote_size)
         # These assume voters know how their utility differs from another's (in the case of nk
         # landscapes this is obviously true)
-        elif (self.vote_type == 'total_score'):
+        elif self.vote_type == "total_score":
             scores = np.sum(proposal_fitnesses, axis=0)
             decimal_winner = np.argwhere(scores == np.max(scores))[0][0]
             binary_winner = self._decimal_to_binary(decimal_winner, self.vote_size)
         # I think this should be the optimal setting for optimization
-        elif (self.vote_type == 'marginal_score'):
+        elif self.vote_type == "marginal_score":
             current_fitnesses = self.get_fitnesses()[np.newaxis].T
-            marginal_scores = proposal_fitnesses - np.tile(current_fitnesses, 2 ** self.vote_size)
+            marginal_scores = proposal_fitnesses - np.tile(
+                current_fitnesses, 2 ** self.vote_size
+            )
             scores = np.sum(marginal_scores, axis=0)
             print(scores)
             decimal_winner = np.argwhere(scores == np.max(scores))[0][0]
@@ -166,16 +186,25 @@ class VoteModel:
     def _generate_vote_indicies(self):
         np.random.shuffle(self.possible_vote_indices)
 
-        return self.possible_vote_indices[0:self.vote_size]
+        return self.possible_vote_indices[0 : self.vote_size]
 
     def print_distribution(self, i, verbose):
-        if (verbose):
+        if verbose:
             fitnesses = self.get_fitnesses()
             print(
-                '\n vote iterations:', i + 1, 'num_solutions:', self.get_num_solutions(), '\n mean:',
+                "\n vote iterations:",
+                i + 1,
+                "num_solutions:",
+                self.get_num_solutions(),
+                "\n mean:",
                 np.mean(fitnesses),
-                'variance:', np.var(fitnesses), '\n min:', np.min(fitnesses),
-                'max:', np.max(fitnesses))
+                "variance:",
+                np.var(fitnesses),
+                "\n min:",
+                np.min(fitnesses),
+                "max:",
+                np.max(fitnesses),
+            )
             sns.distplot(fitnesses)
             plt.show()
 
