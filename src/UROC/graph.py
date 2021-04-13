@@ -60,3 +60,8 @@ plot_object = plt.plot(mean_max_history.T)
 plt.legend(iter(plot_object), vote_types, loc='upper left')
 plt.savefig(folder + "/max.png")
 plt.show()
+
+plt.figure(4)
+plt.title("Plurality Voting")
+plot_object = plt.plot(mean_history[0, 0:4, :].T)
+plt.show()

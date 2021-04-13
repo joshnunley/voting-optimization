@@ -9,25 +9,34 @@ mkdir(folder)
 seed = 0
 np.random.seed(seed)
 
-# 50 and 12, 30 and 6 (in that range)
-n = 3
-k = 2
-nk = NKLandscape(n, k)
-solutions = nk.generate_solutions(5, seed)
-print(solutions)
 
-# One above .5, one below, and one at
-voting_portion = .5
-indices = np.arange(nk.N)
+def generate_solutions(num, n, seed):
+    np.random.seed(seed)
+    return np.random.randint(2, size=(num, n))
+
+
+n = 100
+k = 5  # 0, 1, 5, 10, 15, 20
+voting_portion = .5  # 0.25, 0.5, 0.75
+num_solutions = 500
+nk = NKLandscape(n, k)
+
+solutions = np.zeros(shape=(num_solutions, n))
+non_voting_bits = generate_solutions(num_solutions, int((1 - voting_portion) * n), seed)
+voting_bits = generate_solutions(1, int(voting_portion * n), seed)
+
+indices = np.arange(n)
 np.random.shuffle(indices)
-possible_vote_indices = indices[:int(voting_portion * nk.N)]
+possible_vote_indices = indices[:int(voting_portion * n)]
+not_possible_vote_indices = [x for x in indices if x not in possible_vote_indices]
+solutions[:, possible_vote_indices] = voting_bits
+solutions[:, not_possible_vote_indices] = non_voting_bits
 
 initial_solutions = np.copy(solutions)
 
-# Somewhere between 50 and 100 for iterations AND runs
-iterations = 4  # 100
-runs = 2  # 10 up to 50? Depending on output
-vote_types = ['plurality', 'approval', 'normalized_score', 'total_score', 'marginal_score', 'ranked']
+iterations = 100
+runs = 50
+vote_types = ['plurality', 'approval', 'normalized_score', 'total_score', 'marginal_score']
 mean_history = np.zeros(shape=(len(vote_types), runs, iterations))
 variance_history = np.zeros(shape=(len(vote_types), runs, iterations))
 min_history = np.zeros(shape=(len(vote_types), runs, iterations))
