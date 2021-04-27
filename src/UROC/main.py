@@ -17,10 +17,10 @@ def generate_solutions(num, n, seed):
     return np.random.randint(2, size=(num, n))
 
 
-n = 50
-k = 5  # 0, 1, 5, 10, 15, 20
+n = 50 # 50, 100
+k = 20  # 0, 1, 5, 10, 15, 20
 voting_portion = 0.5  # 0.25, 0.5, 0.75
-num_solutions = 100
+num_solutions = 100 # 100, 300, 500
 nk = NKLandscape(n, k)
 
 initial_solutions = np.zeros(shape=(num_solutions, n)).astype(int)
@@ -35,8 +35,8 @@ initial_solutions[:, possible_vote_indices] = voting_bits
 initial_solutions[:, not_possible_vote_indices] = non_voting_bits
 
 
-iterations = 100
-runs = 50
+iterations = 80 # 100
+runs = 50 # 100
 vote_types = [
     "plurality",
     "approval",
@@ -52,22 +52,26 @@ max_history = np.zeros(shape=(len(vote_types), runs, iterations))
 type_index = 0
 
 for voting_type in vote_types:
-    vote = VoteModel(
-        nk,
-        solutions=initial_solutions,
-        possible_vote_indices=possible_vote_indices,
-        vote_size=2,
-        vote_type=voting_type,
-    )
-
     for k in range(runs):
-        for i in range(iterations):
+        vote = VoteModel(
+            nk,
+            solutions=initial_solutions,
+            possible_vote_indices=possible_vote_indices,
+            vote_size=2,
+            vote_type=voting_type,
+        )
+        mean_history[type_index, k, 0] = vote.get_mean()
+        variance_history[type_index, k, 0] = vote.get_variance()
+        min_history[type_index, k, 0] = vote.get_min()
+        max_history[type_index, k, 0] = vote.get_max()
+
+        for i in range(1, iterations):
             vote.run(iterations=1, until_unique=False, verbose=False)
             mean_history[type_index, k, i] = vote.get_mean()
             variance_history[type_index, k, i] = vote.get_variance()
             min_history[type_index, k, i] = vote.get_min()
             max_history[type_index, k, i] = vote.get_max()
-            print(voting_type, i)
+            print(voting_type, k, i)
     type_index += 1
 
 np.save((folder + "/mean_history"), mean_history)

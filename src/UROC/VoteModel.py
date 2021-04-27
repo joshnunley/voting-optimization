@@ -101,7 +101,6 @@ class VoteModel:
                     proposal_fitnesses[i] == np.max(proposal_fitnesses[i])
                 )[0]
                 tally[vote[0]] += 1
-            print(tally)
             decimal_winner = np.argwhere(tally == np.max(tally))[0][0]
             binary_winner = self._decimal_to_binary(decimal_winner, self.vote_size)
 
@@ -170,7 +169,6 @@ class VoteModel:
                 current_fitnesses, 2 ** self.vote_size
             )
             scores = np.sum(marginal_scores, axis=0)
-            print(scores)
             decimal_winner = np.argwhere(scores == np.max(scores))[0][0]
             binary_winner = self._decimal_to_binary(decimal_winner, self.vote_size)
 
