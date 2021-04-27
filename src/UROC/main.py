@@ -52,7 +52,7 @@ max_history = np.zeros(shape=(len(vote_types), runs, iterations))
 type_index = 0
 
 for voting_type in vote_types:
-    for k in range(runs):
+    for j in range(runs):
         vote = VoteModel(
             nk,
             solutions=initial_solutions,
@@ -60,18 +60,18 @@ for voting_type in vote_types:
             vote_size=2,
             vote_type=voting_type,
         )
-        mean_history[type_index, k, 0] = vote.get_mean()
-        variance_history[type_index, k, 0] = vote.get_variance()
-        min_history[type_index, k, 0] = vote.get_min()
-        max_history[type_index, k, 0] = vote.get_max()
+        mean_history[type_index, j, 0] = vote.get_mean()
+        variance_history[type_index, j, 0] = vote.get_variance()
+        min_history[type_index, j, 0] = vote.get_min()
+        max_history[type_index, j, 0] = vote.get_max()
 
         for i in range(1, iterations):
             vote.run(iterations=1, until_unique=False, verbose=False)
-            mean_history[type_index, k, i] = vote.get_mean()
-            variance_history[type_index, k, i] = vote.get_variance()
-            min_history[type_index, k, i] = vote.get_min()
-            max_history[type_index, k, i] = vote.get_max()
-            print(voting_type, k, i)
+            mean_history[type_index, j, i] = vote.get_mean()
+            variance_history[type_index, j, i] = vote.get_variance()
+            min_history[type_index, j, i] = vote.get_min()
+            max_history[type_index, j, i] = vote.get_max()
+            print(voting_type, j, i)
     type_index += 1
 
 np.save((folder + "/mean_history"), mean_history)
