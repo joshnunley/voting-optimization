@@ -80,7 +80,7 @@ class NKLandscape:
         if (np.trace(self.dependency_matrix) != self.N):
             raise ValueError('The diagonal of the dependency matrix must be all ones')
 
-        if ((K == 0) and (self.dependency_matrix.sum() != self.N)):
+        if ((self.K == 0) and (self.dependency_matrix.sum() != self.N)):
             raise ValueError('When K = 0 the dependency matrix can only be the identity matrix')
 
         if (not np.array_equal(self.dependency_matrix.sum(axis=1), np.full((1, self.N), self.K + 1)[0])):
@@ -105,6 +105,49 @@ class NKLandscape:
             fitness += self.fitness_mapping[i, decimal]
 
         return fitness
+
+    @staticmethod
+    def build_split_dependency_matrix(N, K, voting_indices, non_voting_indices, cross_fraction):
+        """
+        Build a dependency matrix with controlled cross-portion dependency.
+
+        Uses a standard NK landscape with K dependencies per bit, but controls what
+        fraction of those dependencies cross between the shared and individual portions.
+
+        Parameters:
+            N: total number of bit positions
+            K: number of dependencies per bit (standard NK parameter)
+            voting_indices: array of indices in the shared (voting) portion
+            non_voting_indices: array of indices in the individual (non-voting) portion
+            cross_fraction: fraction of K dependencies drawn from the other portion (0 to 1).
+                Fractional counts are resolved stochastically per bit.
+        """
+        voting_set = set(voting_indices)
+        dep_matrix = np.eye(N, dtype=int)
+
+        for i in range(N):
+            if i in voting_set:
+                own_pool = np.array([j for j in voting_indices if j != i])
+                other_pool = np.array(non_voting_indices)
+            else:
+                own_pool = np.array([j for j in non_voting_indices if j != i])
+                other_pool = np.array(voting_indices)
+
+            # Stochastically round fractional cross-dependency count
+            expected_inter = K * cross_fraction
+            n_inter = int(np.floor(expected_inter))
+            if np.random.random() < (expected_inter - n_inter):
+                n_inter += 1
+            n_inter = min(n_inter, len(other_pool))
+            n_intra = K - n_inter
+
+            inter_deps = np.random.choice(other_pool, size=n_inter, replace=False)
+            intra_deps = np.random.choice(own_pool, size=n_intra, replace=False)
+
+            dep_matrix[i, inter_deps] = 1
+            dep_matrix[i, intra_deps] = 1
+
+        return dep_matrix
 
     def set_dependency_matrix(self, dependency_matrix):
         self.dependency_matrix = dependency_matrix

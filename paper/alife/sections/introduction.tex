@@ -1,0 +1,36 @@
+Democratic governance requires a population of individuals with diverse needs and
+circumstances to make binding collective decisions---laws---that affect everyone.
+A tax policy, zoning regulation, or healthcare mandate interacts differently with
+each citizen depending on their occupation, health, location, and other personal
+attributes. This interaction between shared institutions and individual
+heterogeneity is a defining feature of law as a complex adaptive
+system~\citep{ruhl1996fitness}, yet formal models of voting rarely account for
+it.
+
+We propose a framework that captures this structure directly. Each individual is
+represented as a binary string on an NK fitness landscape~\citep{kauffman1993origins},
+partitioned into a \emph{shared portion}---bits modified collectively through
+voting, representing laws---and an \emph{individual portion}---bits that are
+fixed and unique to each person, representing personal traits. The NK epistatic
+structure couples these portions: the fitness contribution of each law-bit
+depends on nearby trait-bits, and vice versa. A cross-dependency parameter
+$\alpha$ controls the strength of this coupling, from fully independent
+($\alpha=0$) to fully entangled ($\alpha=1$).
+
+Within this framework, each round of voting is a step of collective optimization
+on a rugged landscape. Different voting methods---plurality, approval voting,
+score voting, Borda count, instant-runoff voting (IRV), STAR voting, minimax
+(Condorcet), and random dictator---aggregate individual preferences differently,
+and thus navigate the landscape differently over many rounds. Some of these
+methods are in active political contention: plurality remains the default in most
+democracies despite well-known pathologies, while IRV has been adopted in several
+U.S.\ cities and nationally in Australia, and STAR voting is the subject of a
+growing reform movement.
+
+We study two questions. First, how does voting method choice affect long-run
+collective welfare---mean fitness, variance, and distributional outcomes---across
+varying landscape ruggedness~$K$ and law-trait coupling~$\alpha$? Second, how
+does the introduction of representative democracy, where the population votes on
+candidates rather than directly on proposals, alter these dynamics?
+
+% TODO: Final paragraph summarizing contributions/findings after results are in.

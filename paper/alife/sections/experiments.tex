@@ -1,0 +1,32 @@
+All experiments use $N=50$ bit positions with a voting portion of $0.5$
+($N_s = N_t = 25$), a population of $M=300$ individuals, $V=2$ bits voted on per
+round, and 100 voting iterations per run, averaged over 50 independent runs per
+configuration. All individuals share identical initial voting bits but have
+unique, randomly generated individual bits.
+
+\subsection{Experiment 1: $K \times \alpha$ Sweep (Direct Democracy)}
+
+We sweep landscape ruggedness $K \in \{0, 1, 5, 10, 15, 20\}$ and
+cross-dependency $\alpha \in \{0.0, 0.25, 0.5, 0.75, 1.0\}$ under direct
+democracy for all eight voting methods. For each configuration we record the mean
+fitness, fitness variance, minimum and maximum fitness, and the full fitness
+distribution at every iteration.
+
+This sweep addresses the core question: which voting methods are most effective
+at collective optimization, and how does this depend on the complexity of the
+landscape ($K$) and the degree to which shared decisions interact with individual
+heterogeneity ($\alpha$)?
+
+\subsection{Experiment 2: Representative Democracy}
+
+Using a subset of the landscape configurations ($K \in \{5, 10, 15\}$, same
+$\alpha$ grid), we compare direct democracy to representative democracy with
+$C \in \{3, 5\}$ candidates and selection temperatures
+$\tau \in \{\infty\text{ (uniform)}, 1.0, 0.1\}$. All eight voting methods are
+tested in both the direct and representative settings.
+
+This experiment examines how the introduction of representation---and the
+mechanism by which candidates are selected---affects optimization quality and
+distributional equity.
+
+% TODO: Adjust candidate counts and temperatures after initial results if needed.

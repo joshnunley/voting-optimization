@@ -40,9 +40,12 @@ runs = 50 # 100
 vote_types = [
     "plurality",
     "approval",
-    "normalized_score",
     "total_score",
-    "marginal_score",
+    "borda",
+    "irv",
+    "star",
+    "minimax",
+    "random_dictator",
 ]
 mean_history = np.zeros(shape=(len(vote_types), runs, iterations))
 variance_history = np.zeros(shape=(len(vote_types), runs, iterations))

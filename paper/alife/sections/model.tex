@@ -1,0 +1,89 @@
+We model a population of $M$ individuals making collective decisions on an NK
+fitness landscape. Each individual~$i$ is represented by a binary string
+$\mathbf{x}_i \in \{0,1\}^N$, partitioned into a \emph{shared portion}
+$\mathbf{s} \in \{0,1\}^{N_s}$ (identical across all individuals, representing
+laws) and an \emph{individual portion} $\mathbf{t}_i \in \{0,1\}^{N_t}$ (unique
+and fixed, representing personal traits), where $N_s + N_t = N$.
+
+\subsection{Fitness Landscape}
+
+Fitness is computed according to the standard NK
+model~\citep{kauffman1993origins}. Each bit position $j$ contributes a fitness
+value $f_j$ that depends on the bit at position~$j$ and $K$ other positions
+determined by a dependency matrix~$D$:
+\begin{equation}
+  F(\mathbf{x}_i) = \sum_{j=1}^{N} f_j\!\left(\mathbf{x}_i[j],\;
+    \mathbf{x}_i[d_{j,1}],\ldots,\mathbf{x}_i[d_{j,K}]\right),
+\end{equation}
+where $d_{j,1},\ldots,d_{j,K}$ are the $K$ positions on which position~$j$
+depends. Each $f_j$ maps a $(K\!+\!1)$-bit substring to a fitness value drawn
+uniformly from $[-1, 1]$. Increasing $K$ increases the ruggedness of the
+landscape, creating more local optima and making optimization harder.
+
+\subsection{Cross-Dependency Parameter $\alpha$}
+
+We control the coupling between shared and individual portions through a
+cross-dependency fraction $\alpha \in [0,1]$. For each bit position~$j$, a
+fraction~$\alpha$ of its $K$ dependencies are drawn from the \emph{other}
+portion (shared bits depend on individual bits, and vice versa), while the
+remaining $1-\alpha$ fraction are drawn from the same portion. When
+$\alpha K$ is not an integer, we use stochastic rounding: the number of
+cross-dependencies is $\lfloor \alpha K \rfloor + \text{Bernoulli}(\alpha K -
+\lfloor \alpha K \rfloor)$.
+
+At $\alpha=0$, the shared and individual portions are fitness-independent: laws
+have the same effect regardless of individual traits. At $\alpha=1$, dependencies
+are maximally entangled: the fitness effect of every bit depends on bits from
+both portions. This captures the real-world phenomenon that the impact of
+legislation depends on individual circumstances.
+
+\subsection{Voting Process}
+
+At each time step, the system selects $V$ bit positions uniformly at random from
+the shared portion (we use $V=2$ throughout). This defines $2^V$ possible
+proposals (all binary configurations of those positions). Each individual~$i$
+evaluates all proposals by computing the fitness they would obtain under each
+one, producing a utility matrix $U \in \mathbb{R}^{M \times 2^V}$.
+
+A voting method $\mathcal{V}$ aggregates these preferences to select a winning
+proposal, which is then applied to all individuals' shared portions. We study
+eight methods:
+
+\begin{itemize}
+  \item \textbf{Plurality}: Each voter casts one vote for their highest-utility
+    proposal; the proposal with the most votes wins.
+  \item \textbf{Approval}: Each voter approves all proposals that improve their
+    fitness over the status quo (or all tied-for-best if none improve); the most
+    approved proposal wins.
+  \item \textbf{Score}: Sum each voter's raw utility for each proposal; highest
+    total wins.
+  \item \textbf{Borda}: Each voter ranks proposals; points are assigned by rank
+    and summed.
+  \item \textbf{Instant-Runoff (IRV)}: Iteratively eliminate the proposal with
+    the fewest first-place votes, redistributing those votes, until a majority
+    winner emerges.
+  \item \textbf{STAR}: Sum scores to find the top two proposals, then elect the
+    one preferred head-to-head by more voters.
+  \item \textbf{Minimax (Condorcet)}: Select the proposal whose worst pairwise
+    margin of defeat is minimized.
+  \item \textbf{Random Dictator}: A uniformly random voter's top choice is
+    selected. Serves as a baseline.
+\end{itemize}
+
+\subsection{Representative Democracy}
+
+In the representative variant, the population does not vote directly on
+proposals. Instead, $C$ candidates are drawn from the population, each candidate
+identifies their personally preferred proposal, and the entire population votes
+(using the same voting methods above) on which \emph{candidate} to elect. The
+winning candidate's preferred proposal is then implemented.
+
+Candidates may be selected uniformly at random or via a softmax distribution over
+current fitness with temperature $\tau$:
+\begin{equation}
+  P(\text{candidate } i) = \frac{\exp(F(\mathbf{x}_i)/\tau)}
+    {\sum_{j=1}^{M}\exp(F(\mathbf{x}_j)/\tau)}.
+\end{equation}
+Low $\tau$ concentrates candidacy among high-fitness individuals (modeling
+incumbency or elite advantage), while $\tau \to \infty$ recovers uniform
+selection.
