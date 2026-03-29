@@ -1,9 +1,40 @@
-% TODO: Fill in after results are analyzed.
 
-% Key themes to address:
-% - Which voting methods perform best, and does the answer depend on K and alpha?
-% - When does representation help or hurt?
-% - Distributional implications: do some methods optimize mean fitness at the cost of equity?
-% - Connection to real governance: what does alpha capture about real legal systems?
-% - Limitations: binary decisions, no strategic voting, fixed individual portions
-% - Connection to the "law as complex adaptive system" framing
+\subsection{Direct Democracy: Complexity-Dependent Optimization}
+
+Under direct democracy, no voting method universally dominates: the optimal method depends on the complexity of the underlying decision landscape. This goes beyond the classical impossibility theorems of Arrow and Gibbard-Satterthwaite, which characterize methods by axiomatic properties on fixed preference profiles. Our framework reveals that the \emph{empirical} performance ordering of methods is a function of landscape complexity and undergoes sharp phase transitions.
+
+The progression Total Score $\to$ Scoring ($p\!=\!0.35$) $\to$ Borda $\to$ STAR has a natural interpretation in terms of information aggregation depth. On smooth landscapes, preferences are nearly aligned and a simple sum of utilities suffices. As ruggedness increases, preferences fragment: a flatter ordinal scoring rule ($p\!=\!0.35$) that spreads weight across the ranking, outperforms both the raw sum and plurality's hard cutoff. At moderate complexity, full ordinal information becomes essential (Borda, $p\!=\!1$), and at the highest complexity, even ordinal information must be combined with pairwise verification (STAR). Each successive method in the progression extracts richer information from voters' preferences, at increasing computational and communicative cost. Among classical methods plurality occupies part of the regime where $p\!=\!0.35$ dominates, suggesting that plurality captures a real low-complexity signal but that its hard cutoff is too coarse to exploit it fully.
+
+\subsection{Voting Rules as Utility Transforms}
+
+In our model, all voting methods operate on the same utility matrix
+$U \in \mathbb{R}^{M \times n}$ and can be understood as different
+transformations of this common input: plurality compresses each row to an
+argmax, Borda replaces magnitudes with ordinal ranks, score voting sums
+cardinal values directly, and pairwise methods reprocess the profile through
+head-to-head comparisons. Each transformation preserves different features of
+$U$---top-choice information, ordinal structure, cardinal intensity, or pairwise
+margins---while discarding others.
+
+This framing suggests a theoretical research program. Given assumptions about
+the fitness landscape (ruggedness, cross-dependency structure), one might prove
+which properties of the utility transform lead to optimal collective
+optimization, connecting computational social choice to optimization theory.
+For instance, our results suggest that on smooth landscapes, preserving cardinal
+magnitudes is optimal (score voting), while on rugged landscapes, preserving
+full ordinal structure (Borda) or pairwise comparisons (STAR) becomes necessary.
+A formal theory characterizing this relationship could yield optimality results
+for voting methods as a function of landscape properties, rather than relying on
+axiomatic criteria alone.
+
+\subsection{Borda's Robustness and Equity}
+
+Borda count's simultaneous dominance in both mean fitness and variance across a wide complexity range is the most practically relevant finding. Borda is never catastrophically bad (worst observed rank $\approx 4$) and is the only method that achieves both high efficiency and high equity across the majority of the parameter space. This complements classical axiomatic work that identifies Borda by distinctive structural properties \citep{young1974axiom}, but in a dynamic, multi-round optimization setting far from the one-shot environments usually studied in social choice theory.
+
+\subsection{Representation as an Information Bottleneck}
+
+Representation reshapes the regime structure even under favorable conditions. At $(\beta = 0,\, p_{\mathrm{self}} = 0)$, the direct democracy ordering is partially visible but already altered: representation acts as a lossy compression, and even faithful delegates cannot fully reconstruct the population-level signal that direct democracy exploits. The two representation parameters introduce qualitatively different distortions: high $p_{\mathrm{self}}$ produces chaotic rank curves with no stable method ordering, while high $\beta$ favors simpler methods; plurality performs surprisingly well when voters select on identity rather than policy, as its concentrated signal is more resistant to noise than methods requiring richer preference information. The implication for institutional design is that voting method choice matters most under faithful representation; as either $\beta$ or $p_{\mathrm{self}}$ increases, the binding constraint shifts from aggregation quality to representation quality.
+
+\subsection{Limitations}
+
+Several simplifications limit generalizability. All agents vote sincerely; strategic voting could qualitatively change method comparisons, particularly for IRV and Borda \citep{gibbard1973manipulation}. Individual portions are fixed; in reality, personal circumstances respond to collective decisions. The NK landscape is random; results are averages over realizations, not predictions for specific policy domains. The proposal space ($V = 2$ for direct, $V = 4$ for representative) is small. Our constituency assignment uses Hamming distance, a simplification of real representational geography. Finally, we study only three discrete values of $\beta$ and $p_{\mathrm{self}}$; finer resolution might reveal additional structure.

@@ -1,8 +1,27 @@
-% TODO: Fill in after discussion is written.
 
-% Summary of contributions:
-% 1. NK-based model of collective governance with shared/individual bit structure
-% 2. Cross-dependency parameter alpha bridging independent and fully coupled regimes
-% 3. Systematic comparison of 8 voting methods as long-run optimizers
-% 4. Direct vs representative democracy comparison with candidate selection mechanisms
-% 5. Distributional analysis beyond aggregate fitness
+We have presented an NK landscape framework for studying voting methods as collective optimizers. The main findings are:
+
+\begin{enumerate}
+  \item \textbf{Complexity-dependent method ordering.} Under direct democracy,
+    method performance undergoes sharp phase transitions: total score $\to$
+    scoring ($p\!=\!0.35$) $\to$ Borda $\to$ STAR as complexity increases. No
+    method universally dominates.
+
+  \item \textbf{Borda's robustness.} Borda count is simultaneously the most
+    efficient and most equitable method across a wide complexity range. A sweep
+    over the generalized scoring family reveals that $p=0.35$ (a flatter
+    ordinal scoring rule) dominates plurality in the low-to-moderate regime while matching
+    Borda's favorable variance properties.
+
+  \item \textbf{Voting rules as utility transforms.} The model frames voting
+    methods as transformations of a common utility matrix, suggesting that formal
+    connections between transform properties and landscape-dependent optimality
+    may be possible.
+
+  \item \textbf{Representation as information bottleneck.} Under representative
+    democracy, the regime structure is reshaped by candidate selfishness and
+    identity voting, with simpler methods gaining advantage as representation
+    degrades.
+\end{enumerate}
+
+These results suggest that debates over voting reform are implicitly debates about the complexity of the policy landscape. Future work might explore strategic voting, develop formal connections between utility transform properties and landscape-dependent optimality, introduce fitness-biased candidate selection to model incumbency advantage, and extend the framework with a third, socially transmitted ``belief'' portion of the bitstring so that opinion dynamics on networks can interact with collective optimization.

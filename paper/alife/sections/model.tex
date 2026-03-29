@@ -25,29 +25,35 @@ landscape, creating more local optima and making optimization harder.
 We control the coupling between shared and individual portions through a
 cross-dependency fraction $\alpha \in [0,1]$. For each bit position~$j$, a
 fraction~$\alpha$ of its $K$ dependencies are drawn from the \emph{other}
-portion (shared bits depend on individual bits, and vice versa), while the
-remaining $1-\alpha$ fraction are drawn from the same portion. When
-$\alpha K$ is not an integer, we use stochastic rounding: the number of
-cross-dependencies is $\lfloor \alpha K \rfloor + \text{Bernoulli}(\alpha K -
-\lfloor \alpha K \rfloor)$.
-
-At $\alpha=0$, the shared and individual portions are fitness-independent: laws
-have the same effect regardless of individual traits. At $\alpha=1$, dependencies
-are maximally entangled: the fitness effect of every bit depends on bits from
-both portions. This captures the real-world phenomenon that the impact of
-legislation depends on individual circumstances.
+portion, while the remaining $1-\alpha$ are drawn from the same portion.
+At $\alpha=0$, dependencies are entirely internal: laws affect all citizens
+identically. At $\alpha=1$, dependencies are entirely cross-portion: individual
+traits mediate all policy effects but lack complex internal structure. At
+$\alpha \approx 0.5$, both are present, creating the highest effective
+complexity.
 
 \subsection{Voting Process}
 
 At each time step, the system selects $V$ bit positions uniformly at random from
-the shared portion (we use $V=2$ throughout). This defines $2^V$ possible
+the shared portion (we use $V=2$ in direct democracy unless otherwise noted).
+This defines $2^V$ possible
 proposals (all binary configurations of those positions). Each individual~$i$
 evaluates all proposals by computing the fitness they would obtain under each
 one, producing a utility matrix $U \in \mathbb{R}^{M \times 2^V}$.
 
-A voting method $\mathcal{V}$ aggregates these preferences to select a winning
-proposal, which is then applied to all individuals' shared portions. We study
-eight methods:
+A voting method $\mathcal{V}$ then acts on this matrix to select a winning
+proposal, which is applied to all individuals' shared portions. Equivalently, we
+may view each method as a function
+\begin{equation}
+  \mathcal{V}: \mathbb{R}^{M \times 2^V} \to \{1,\ldots,2^V\},
+\end{equation}
+or as a two-stage map that first transforms $U$ into proposal scores and then
+selects the maximiser. Under this interpretation, all methods solve the same
+task from the same input, but they differ in which information from $U$ they
+retain. Some use only each voter's top choice, others use full ordinal
+rankings, others use cardinal magnitudes, and pairwise methods reprocess the
+same profile through head-to-head comparisons. We study eight standard methods
+plus one member of a generalized scoring family:
 
 \begin{itemize}
   \item \textbf{Plurality}: Each voter casts one vote for their highest-utility
@@ -68,22 +74,57 @@ eight methods:
     margin of defeat is minimized.
   \item \textbf{Random Dictator}: A uniformly random voter's top choice is
     selected. Serves as a baseline.
+  \item \textbf{Scoring ($p\!=\!0.35$)}: A positional scoring rule where rank~$k$
+    (out of $n$) receives score $((n\!-\!1\!-\!k)/(n\!-\!1))^{0.35}$. This is a
+    member of the power-law scoring family that interpolates between
+    antiplurality ($p \to 0$) and plurality ($p \to \infty$), with Borda at
+    $p=1$. At $p=0.35$, the rule is flatter than Borda, assigning substantial
+    weight across the ranking while remaining purely ordinal. This exponent was
+    identified from a sweep over the scoring family as the value that dominates
+    at low-to-moderate complexity.
 \end{itemize}
 
 \subsection{Representative Democracy}
 
-In the representative variant, the population does not vote directly on
-proposals. Instead, $C$ candidates are drawn from the population, each candidate
-identifies their personally preferred proposal, and the entire population votes
-(using the same voting methods above) on which \emph{candidate} to elect. The
-winning candidate's preferred proposal is then implemented.
+In the representative variant, $C$ candidates are drawn uniformly at random
+from the population. Each candidate $c$ represents a \emph{constituency}:
+voters assigned by nearest-neighbor Hamming distance on individual traits.
 
-Candidates may be selected uniformly at random or via a softmax distribution over
-current fitness with temperature $\tau$:
+\paragraph{Platform formation ($p_{\mathrm{self}}$).}
+With probability $p_{\mathrm{self}}$, candidate $c$ acts as a \emph{trustee}
+and selects the proposal maximizing their own fitness; with probability
+$1 - p_{\mathrm{self}}$, they act as a \emph{delegate} and maximize mean
+constituency welfare. This interpolates between the classical delegate
+($p_{\mathrm{self}}=0$) and trustee ($p_{\mathrm{self}}=1$) models.
+
+\paragraph{Candidate election ($\beta$).}
+Voters evaluate candidates by a convex combination of \emph{policy utility}
+$u_{\mathrm{policy}}(i,c) = F_i(\pi_c)$ and \emph{identity utility}
+$u_{\mathrm{id}}(i,c) = 1 - d_H(\mathbf{t}_i, \mathbf{t}_c)/N_t$:
 \begin{equation}
-  P(\text{candidate } i) = \frac{\exp(F(\mathbf{x}_i)/\tau)}
-    {\sum_{j=1}^{M}\exp(F(\mathbf{x}_j)/\tau)}.
+  u(i, c) = (1-\beta)\,\tilde{u}_{\mathrm{policy}}(i, c)
+           + \beta\,u_{\mathrm{id}}(i, c),
 \end{equation}
-Low $\tau$ concentrates candidacy among high-fitness individuals (modeling
-incumbency or elite advantage), while $\tau \to \infty$ recovers uniform
-selection.
+where $\beta \in [0,1]$ is the \emph{identity weight} and both components are
+normalized to $[0,1]$. The same voting method used in direct democracy then
+elects a winning candidate whose platform is implemented.
+
+The $(\beta, p_{\mathrm{self}})$ plane nests four interpretable limiting cases:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Model & $\beta$ & $p_{\mathrm{self}}$ \\
+\midrule
+Trustee (policy election, self-interested) & 0 & 1 \\
+Delegate (policy election, constituency)   & 0 & 0 \\
+Identity-trustee (identity election, self-interested) & 1 & 1 \\
+Identity-delegate (identity election, constituency)   & 1 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The cross-dependency $\alpha$ interacts with $\beta$: when $\alpha=0$, identity
+utility carries no policy information and $\beta > 0$ introduces pure noise;
+when $\alpha=1$, traits fully mediate policy effects, making identity a strong
+proxy for policy alignment.

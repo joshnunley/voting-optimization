@@ -1,5 +1,5 @@
 Democratic governance requires a population of individuals with diverse needs and
-circumstances to make binding collective decisions---laws---that affect everyone.
+circumstances to make binding collective decisions (laws) that affect everyone.
 A tax policy, zoning regulation, or healthcare mandate interacts differently with
 each citizen depending on their occupation, health, location, and other personal
 attributes. This interaction between shared institutions and individual
@@ -9,28 +9,79 @@ it.
 
 We propose a framework that captures this structure directly. Each individual is
 represented as a binary string on an NK fitness landscape~\citep{kauffman1993origins},
-partitioned into a \emph{shared portion}---bits modified collectively through
-voting, representing laws---and an \emph{individual portion}---bits that are
+partitioned into a \emph{shared portion} (bits modified collectively through
+voting, representing laws) and an \emph{individual portion} (bits that are
 fixed and unique to each person, representing personal traits. The NK epistatic
 structure couples these portions: the fitness contribution of each law-bit
 depends on nearby trait-bits, and vice versa. A cross-dependency parameter
-$\alpha$ controls the strength of this coupling, from fully independent
-($\alpha=0$) to fully entangled ($\alpha=1$).
+$\alpha$ controls the fraction of each bit's dependencies that cross between
+portions. At $\alpha=0$, dependencies are purely internal: laws interact only
+with other laws, so legislation affects all citizens identically. At $\alpha=1$,
+dependencies are purely cross-portion: every law's effect depends on individual
+traits, but traits lack complex internal interactions. Intermediate values produce
+the richest landscapes; at $\alpha \approx 0.5$, both internal and
+cross-dependencies are present, creating the highest effective complexity. This
+parameter formalizes a spectrum familiar from political economy: from purely
+public goods ($\alpha=0$) to policies whose effect is entirely mediated by
+personal circumstances ($\alpha=1$).
 
 Within this framework, each round of voting is a step of collective optimization
-on a rugged landscape. Different voting methods---plurality, approval voting,
+on a rugged landscape. Different voting methods: plurality, approval voting,
 score voting, Borda count, instant-runoff voting (IRV), STAR voting, minimax
-(Condorcet), and random dictator---aggregate individual preferences differently,
-and thus navigate the landscape differently over many rounds. Some of these
-methods are in active political contention: plurality remains the default in most
-democracies despite well-known pathologies, while IRV has been adopted in several
-U.S.\ cities and nationally in Australia, and STAR voting is the subject of a
-growing reform movement.
+(Condorcet), and random dictator, aggregate individual preferences differently,
+and thus navigate the landscape differently over many rounds.
 
-We study two questions. First, how does voting method choice affect long-run
-collective welfare---mean fitness, variance, and distributional outcomes---across
-varying landscape ruggedness~$K$ and law-trait coupling~$\alpha$? Second, how
-does the introduction of representative democracy, where the population votes on
-candidates rather than directly on proposals, alter these dynamics?
+This perspective suggests a useful unifying interpretation. In our model, all
+voting methods receive the same input: a utility matrix
+$U \in \mathbb{R}^{M \times 2^V}$ whose $(i,p)$ entry is the fitness voter~$i$
+would obtain under proposal~$p$. A voting rule can therefore be viewed as a
+\emph{transformation of the same utility field}: different methods preserve,
+compress, or discard different aspects of $U$ before selecting a winner. For
+example, plurality keeps only each voter's top choice, score voting sums raw
+cardinal values, and Borda discards magnitudes but preserves full within-voter
+ordinal structure. From this viewpoint, voting methods differ not only in
+normative properties but also in the kind of information processing they
+perform.
 
-% TODO: Final paragraph summarizing contributions/findings after results are in.
+Beyond direct democracy, we develop a unified model of \emph{representative
+democracy} grounded in two longstanding debates in political theory. The first is
+the \emph{trustee--delegate debate}: does a representative exercise independent
+judgment (Burke's trustee~\citep{burke1774bristol}) or faithfully implement
+constituent preferences (the delegate model)? We parameterize this as
+$p_{\mathrm{self}} \in [0,1]$, the probability a candidate's platform reflects
+their own interest rather than their constituency's collective welfare. The second
+is the question of \emph{identity versus policy voting}: do citizens elect
+representatives who share their background and circumstances (descriptive
+representation~\citep{mansbridge1999should}) or those whose platforms promise the
+best outcomes? We parameterize this as $\beta \in [0,1]$, the weight on
+identity-based versus policy-based candidate evaluation. Candidates' constituencies
+are defined by nearest-neighbor Hamming distance in individual traits. Those who
+share your circumstances are your representatives. The cross-dependency $\alpha$
+then plays a natural role: when $\alpha=0$, individual traits are irrelevant to
+policy outcomes and identity voting carries no information; when $\alpha=1$,
+traits fully mediate policy effects, making identity a strong proxy for policy
+alignment.
+
+We study two core questions. First, how does voting method choice affect long-run
+collective welfare (mean fitness, variance, and distributional outcomes) across
+varying landscape ruggedness $K$ and law-trait coupling $\alpha$? Second, how
+does the introduction of representation, and the choice of $\beta$ and
+$p_{\mathrm{self}}$, alter these dynamics, and in what parameter regimes does
+representation help or hurt?
+
+Our main finding is that voting methods undergo sharp phase transitions as a
+function of landscape complexity: total score voting dominates on smooth
+landscapes, a generalized scoring rule with $p=0.35$ at low-to-moderate
+ruggedness, Borda count across a wide middle range, and STAR voting at the
+highest complexity. These transitions are
+well-described by a two-parameter empirical formula that reduces the $(K, \alpha)$
+plane to a single complexity axis for visualization. Borda count is the most consistent method,
+achieving both the highest mean fitness and lowest variance across the majority
+of the parameter space. Under representative democracy, the complexity-dependent
+regime structure is reshaped even under favorable conditions: total score voting
+dominates across most regimes, and as identity voting increases, plurality
+performs surprisingly well while sophisticated methods lose their advantage.
+Conceptually, these results also suggest a
+new research question: whether voting rules can be ordered by computable
+properties of the utility transformation they implement, and whether such
+properties predict performance across environments.

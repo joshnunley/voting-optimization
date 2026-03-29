@@ -1,15 +1,25 @@
 Laws and institutions shape individual outcomes through complex interactions with
-citizens' diverse characteristics, yet the mechanisms by which different voting
-methods navigate this coupled landscape remain poorly understood. We model
-collective governance as optimization on NK fitness landscapes, where a shared
-portion of each solution---analogous to laws---is updated through voting, while
-an individual portion---analogous to personal traits---remains fixed and unique.
-Epistatic interactions between these portions capture how the effects of
-legislation depend on individual circumstances. We compare eight voting methods
-(plurality, approval, score, Borda, instant-runoff, STAR, minimax, and random
-dictator) across a sweep of landscape ruggedness~$K$ and cross-dependency
-$\alpha$ between shared and individual portions. We further contrast direct
-democracy with representative democracy under varying candidate selection
-mechanisms. Our results reveal how voting method choice affects not only
-collective fitness but also the distribution of outcomes across the population,
-with implications for understanding law as a complex adaptive system.
+citizens' diverse circumstances, yet how different voting methods navigate this
+coupled landscape remains poorly understood. We model collective governance as
+optimization on NK fitness landscapes, where shared bits (laws) are updated by
+voting while individual bits (personal traits) remain fixed. A cross-dependency
+parameter $\alpha$ controls how legislation's effects depend on individual
+circumstances. We compare eight standard voting methods and a generalized
+scoring family across landscape ruggedness $K \in \{1,\ldots,20\}$ and
+$\alpha \in [0,1]$ with 1000 runs per configuration.
+
+We find that the optimal voting method undergoes sharp phase transitions as a
+function of landscape complexity: total score voting dominates on smooth
+landscapes, a generalized scoring rule with $p=0.35$ at low-to-moderate
+ruggedness, Borda count across a wide middle range, and STAR voting at the
+highest complexity. A two-parameter empirical formula reduces the
+$(K, \alpha)$ plane to a single complexity axis for visualization. Borda count
+emerges as uniquely robust, achieving the highest mean fitness and lowest
+variance across most of the parameter space.
+
+We further introduce a representative democracy model parameterized by identity
+weight $\beta$ and candidate selfishness $p_{\mathrm{self}}$. Representation
+reshapes the complexity-dependent structure even under favorable conditions: total
+score voting dominates across most regimes, and as identity voting increases,
+plurality performs surprisingly well while sophisticated methods lose their
+advantage.

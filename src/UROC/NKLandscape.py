@@ -54,6 +54,19 @@ class NKLandscape:
         else:
             self.fitness_mapping = fitness_mapping
 
+        self._precompute_dep_indices()
+
+    def _precompute_dep_indices(self):
+        """Precompute per-position dependency index arrays and bit weights for fast fitness lookup."""
+        dep_indices = np.zeros((self.N, self.K + 1), dtype=int)
+        for i in range(self.N):
+            deps = np.argwhere(self.dependency_matrix[i, :] == 1).T[0]
+            roll_by = -int(np.argwhere(deps == i)[0, 0])
+            dep_indices[i] = np.roll(deps, roll_by)
+        self.dep_indices = dep_indices
+        # Weights for binary-to-decimal: MSB first → [2^K, 2^(K-1), ..., 1]
+        self.bit_weights = (2 ** np.arange(self.K, -1, -1)).astype(np.int64)
+
     def _construct_sequential_dependency_matrix(self):
         dependency_matrix = np.identity(self.N)
 
@@ -93,18 +106,25 @@ class NKLandscape:
         return np.random.randint(2, size=(num, self.N))
 
     def calculate_fitness(self, solution):
-        fitness = 0
-        for i in range(self.N):
-            dependency_indicies = np.argwhere(self.dependency_matrix[i, :] == 1).T[0]
-            rolled_dependency_indicies = np.roll(dependency_indicies, -np.argwhere(dependency_indicies == i)[0])
+        substrings = solution[self.dep_indices]          # (N, K+1)
+        decimals = (substrings @ self.bit_weights).astype(int)  # (N,)
+        return float(np.sum(self.fitness_mapping[np.arange(self.N), decimals]))
 
-            rolled_dependency_indicies = rolled_dependency_indicies
-            substring = solution[rolled_dependency_indicies]
-            decimal = self._binary_to_decimal(substring)
+    def calculate_fitness_batch(self, solutions):
+        """Vectorized fitness for a batch of solutions.
 
-            fitness += self.fitness_mapping[i, decimal]
-
-        return fitness
+        Parameters
+        ----------
+        solutions : (M, N) int array
+        Returns
+        -------
+        (M,) float array of fitness values
+        """
+        substrings = solutions[:, self.dep_indices]          # (M, N, K+1)
+        decimals = (substrings @ self.bit_weights).astype(int)  # (M, N)
+        row_offsets = np.arange(self.N, dtype=np.int64) * self.fitness_mapping.shape[1]
+        linear_idx = row_offsets[None, :] + decimals            # (M, N)
+        return np.sum(self.fitness_mapping.ravel()[linear_idx], axis=1)  # (M,)
 
     @staticmethod
     def build_split_dependency_matrix(N, K, voting_indices, non_voting_indices, cross_fraction):
@@ -152,6 +172,7 @@ class NKLandscape:
     def set_dependency_matrix(self, dependency_matrix):
         self.dependency_matrix = dependency_matrix
         self._check_dependency_matrix()
+        self._precompute_dep_indices()
 
     def get_dependency_matrix(self):
         return self.dependency_matrix

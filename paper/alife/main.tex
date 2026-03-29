@@ -1,24 +1,25 @@
-\documentclass[12pt]{article}
-\usepackage[utf8]{inputenc}
+\documentclass[letterpaper]{article}
+
+\usepackage{natbib,alifeconf}  %% The order is important
+\usepackage{url,hyperref}
 \usepackage{amsmath,amssymb}
-\usepackage{graphicx}
 \usepackage{booktabs}
-\usepackage{natbib}
-\usepackage{hyperref}
-\usepackage{subcaption}
+\usepackage{placeins}
+\usepackage{dblfloatfix}
 
-% TODO: Replace with ALIFE 2026 style file when available
+\graphicspath{{figures/}}
 
-\title{Voting Methods as Collective Optimization on Rugged Fitness Landscapes}
+\title{Democracy on Rugged Landscapes: Phase Transitions in Optimal Voting Rules}
 
 \author{
-  Josh Nunley \\
-  % affiliation
+    Josh Nunley$^{1}$ \\
+    \mbox{}\\
+    $^1$Indiana University, Bloomington, IN, USA \\
+    joshnunl@iu.edu
 }
 
-\date{}
-
 \begin{document}
+
 \maketitle
 
 \begin{abstract}
@@ -46,7 +47,18 @@
 \section{Conclusion}
 \input{sections/conclusion}
 
-\bibliographystyle{apalike}
+\section{Acknowledgments}
+This work used the Big Red 200 supercomputer at Indiana University, supported by
+Lilly Endowment, Inc., through its support for the Indiana University Pervasive
+Technology Institute. AI tools were used to assist with editing the manuscript and
+assisting with code development. Multiple independent AI systems were employed, with
+outputs cross-referenced to identify inconsistencies. The author reviewed all
+AI-generated and AI-edited content, taking full responsibility for the final
+work. All code was further validated through systematic testing and
+visualization.
+
+\footnotesize
 \bibliography{references}
+\bibliographystyle{apalike}
 
 \end{document}

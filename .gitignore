@@ -127,3 +127,19 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Project-specific
+logs/
+data/
+probe_results/
+src/UROC/results/
+results/
+*.npy
+*.npz
+jobs*.txt
+
+# LaTeX intermediates and output
+paper/alife/main.pdf
+paper/alife/*.aux
+paper/alife/*.bbl
+paper/alife/*.blg

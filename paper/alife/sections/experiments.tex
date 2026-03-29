@@ -1,32 +1,38 @@
 All experiments use $N=50$ bit positions with a voting portion of $0.5$
-($N_s = N_t = 25$), a population of $M=300$ individuals, $V=2$ bits voted on per
-round, and 100 voting iterations per run, averaged over 50 independent runs per
-configuration. All individuals share identical initial voting bits but have
-unique, randomly generated individual bits.
+($N_s = N_t = 25$), a population of $M=100$ individuals, $V=2$ bits voted on per
+round, and all individuals sharing identical initial voting bits with unique,
+randomly generated individual bits.
 
 \subsection{Experiment 1: $K \times \alpha$ Sweep (Direct Democracy)}
 
-We sweep landscape ruggedness $K \in \{0, 1, 5, 10, 15, 20\}$ and
-cross-dependency $\alpha \in \{0.0, 0.25, 0.5, 0.75, 1.0\}$ under direct
-democracy for all eight voting methods. For each configuration we record the mean
-fitness, fitness variance, minimum and maximum fitness, and the full fitness
-distribution at every iteration.
+We sweep landscape ruggedness $K \in \{1, 2, \ldots, 20\}$ and cross-dependency
+$\alpha \in \{0.00, 0.05, 0.10, \ldots, 1.00\}$ (21 levels) under direct
+democracy for all eight standard voting methods. Each configuration is run for
+$150 + 50K$ iterations with 1000 independent runs, providing high-resolution
+coverage of the full $(K, \alpha)$ plane. For each run we record mean fitness,
+fitness variance, minimum and maximum fitness at every iteration.
 
-This sweep addresses the core question: which voting methods are most effective
-at collective optimization, and how does this depend on the complexity of the
-landscape ($K$) and the degree to which shared decisions interact with individual
-heterogeneity ($\alpha$)?
+In addition, we sweep a generalized positional scoring family parameterized by
+exponent $p$: rank~$k$ (out of $n$) receives score $((n\!-\!1\!-\!k)/(n\!-\!1))^p$.
+This family includes antiplurality ($p \to 0$), Borda ($p=1$), and plurality
+($p \to \infty$) as special cases. We evaluate 28 exponents spanning
+$p \in [0.05, 10]$ across the full $(K, \alpha)$ grid with 1000 runs per
+configuration, identifying $p = 0.35$ as the exponent that dominates at
+low-to-moderate complexity. This ninth method is included in all subsequent
+analyses.
 
 \subsection{Experiment 2: Representative Democracy}
 
-Using a subset of the landscape configurations ($K \in \{5, 10, 15\}$, same
-$\alpha$ grid), we compare direct democracy to representative democracy with
-$C \in \{3, 5\}$ candidates and selection temperatures
-$\tau \in \{\infty\text{ (uniform)}, 1.0, 0.1\}$. All eight voting methods are
-tested in both the direct and representative settings.
+\label{sec:exp2}
 
-This experiment examines how the introduction of representation---and the
-mechanism by which candidates are selected---affects optimization quality and
-distributional equity.
-
-% TODO: Adjust candidate counts and temperatures after initial results if needed.
+Using the representative democracy model described in Section~3, we sweep
+$\beta \in \{0,\, 0.5,\, 1\}$ and $p_{\mathrm{self}} \in \{0,\, 0.5,\, 1\}$
+(9 configurations) with $C=5$ candidates selected uniformly at random, $V=4$
+bits voted on per round (16 proposals), across the full landscape grid:
+$K \in \{1, \ldots, 20\}$ and $\alpha \in \{0.0, 0.1, \ldots, 1.0\}$.
+All nine voting methods are tested, yielding 17{,}820 configurations with 500
+independent runs each. The larger proposal space ($V=4$ versus $V=2$ in
+Experiment~1) ensures that candidates can hold distinct platforms and
+constituency welfare can meaningfully diverge from population welfare. Using
+the same $(K, \alpha)$ grid as Experiment~1 allows direct comparison of the
+fitted complexity axis under representation.

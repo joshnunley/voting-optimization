@@ -1,15 +1,78 @@
-% TODO: Fill in after experiments complete.
 
 \subsection{Direct Democracy: $K \times \alpha$ Sweep}
 
-% Mean fitness trajectories across voting methods
-% Effect of K on method ranking
-% Effect of alpha on method ranking
-% Distributional outcomes: variance, min/max gap
+We present three main findings from the full $(K, \alpha)$ sweep: (1)~method-specific phase diagrams revealing regime-dependent performance, (2)~a fitted complexity parameter that aids visualization by reducing the $(K, \alpha)$ plane to a single axis, and (3)~a dissociation between efficiency (mean fitness) and equity (fitness variance).
+
+\subsubsection{Mean Fitness Rank Phase Diagram}
+
+Figure~\ref{fig:mean_rank} shows the rank of each voting method (1=best, 9=worst) by terminal mean fitness at every $(K, \alpha)$ configuration.
+
+\textbf{Regime transitions.} No single method dominates. Instead, the $(K, \alpha)$ plane is partitioned into regimes where different methods are optimal. At the lowest complexity ($K \leq 3$, $\alpha > 0$), total score voting ranks first: a simple utilitarian sum suffices when the landscape is nearly additive. Among the eight classical methods, as $K$ increases to $4$--$9$, plurality takes over in the mid-$\alpha$ range. However, the generalized scoring rule with $p=0.35$ (identified from a comprehensive sweep over exponents in $[0.05, 10]$) dominates this entire low-to-moderate regime, outperforming plurality while maintaining Borda's favorable equity properties (Figure~\ref{fig:rank_vs_complexity}). At moderate complexity ($K \approx 8$--$14$), Borda count dominates: full ordinal information becomes essential on a rugged landscape. At the highest complexity ($K \geq 15$), STAR voting emerges as rank~1 in the mid-$\alpha$ region, with its two-stage mechanism (scoring followed by pairwise runoff) uniquely suited to maximally rugged, conflicted landscapes.
+
+\textbf{Approval voting's phase transition.} Approval voting exhibits a U-shaped pattern: it ranks first at extreme $\alpha$ values ($\alpha \approx 0$ and $\alpha \approx 1$) but drops to rank~7 across the entire mid-$\alpha$ band ($0.25 \leq \alpha \leq 0.80$) for $K \geq 5$. This boundary is sharp, not gradual, and reflects a structural failure: approval conditions on the status quo, which becomes a poor proxy for the collective optimum when individual circumstances partially mediate policy effects.
+
+\textbf{Random dictator.} Random dictator is rank~9 (worst) at nearly every configuration except $\alpha = 0$, confirming its role as a coordination-free baseline.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\columnwidth]{phaseF1_mean_rank.pdf}
+  \caption{Mean fitness rank (1=best, 9=worst) for each voting method across the full $(K, \alpha)$ grid. Green indicates top performance; red indicates poor performance. Regime transitions are visible as sharp boundaries between green and red regions.}
+  \label{fig:mean_rank}
+\end{figure}
+
+\subsubsection{A Fitted Complexity Parameter}
+
+To visualize regime transitions on a single axis, we fit parabolic iso-complexity curves
+\begin{equation}
+  K = a\,(K_0 - 1)^2 \left(\alpha - \tfrac{1}{2} - \frac{b}{K_0 - 1}\right)^{\!2} + K_0,
+  \label{eq:complexity}
+\end{equation}
+where $K_0 \in [1, 20]$ indexes complexity and $a$, $b$ are fitted by maximizing rank-vector uniformity along iso-$K_0$ contours (Gaussian-kernel-weighted rank variance, bandwidth $\varepsilon = 0.5$). The fitted values are $a = 2.35$, $b = 0.29$. The center $\mu(K_0) = \tfrac{1}{2} + b/(K_0-1)$ converges to $\tfrac{1}{2}$ at high complexity, consistent with $\alpha = \tfrac{1}{2}$ producing the richest dependency structure.
+For $K_0 = 1$, where the parameterization is singular, we treat the degenerate
+iso-complexity contour separately as the flat line $K=1$.
+
+\subsubsection{Efficiency and Equity vs.\ Complexity}
+
+Figure~\ref{fig:rank_vs_complexity} shows mean fitness rank (top) and variance rank (bottom) for all nine methods plotted against normalized complexity $K_0/20$. The regime transitions collapse cleanly onto this single axis for both measures.
+
+\textbf{Efficiency.} Total score dominates at low complexity, then scoring ($p\!=\!0.35$) takes over through the low-to-moderate range, Borda dominates the mid-range, and STAR emerges at the highest complexity. Among classical methods alone, plurality briefly leads in the low-to-moderate range, but $p\!=\!0.35$ strictly dominates it there.
+
+\textbf{Equity.} Both Borda and scoring ($p\!=\!0.35$) achieve rank~1--2 for variance (most equitable) across nearly the entire complexity range. Scoring ($p\!=\!0.35$) achieves the best or near-best equity while simultaneously dominating efficiency at low-to-moderate complexity, a combination no classical method achieves. Plurality and random dictator consistently produce high variance; IRV shows poor equity at high complexity.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\columnwidth]{rank_vs_complexity_stacked.pdf}
+  \caption{Mean fitness rank (top) and variance rank (bottom) vs.\ fitted complexity $K_0/20$. The progression Total Score $\to$ Scoring ($p\!=\!0.35$) $\to$ Borda $\to$ STAR is visible for efficiency; both Borda and Scoring ($p\!=\!0.35$) dominate equity.}
+  \label{fig:rank_vs_complexity}
+\end{figure}
 
 \subsection{Representative Democracy}
 
-% Comparison to direct democracy baselines
-% Effect of candidate pool size
-% Effect of selection temperature
-% Distributional shifts under representation
+We sweep $\beta \in \{0, 0.5, 1\}$ and $p_{\mathrm{self}} \in \{0, 0.5, 1\}$ across the full $(K, \alpha)$ grid ($K \in \{1, \ldots, 20\}$, $\alpha \in \{0.0, 0.1, \ldots, 1.0\}$) with $V = 4$ bits, $C = 5$ candidates, and 500 runs per configuration.
+
+\subsubsection{The $(\beta, p_{\mathrm{self}})$ Grid}
+
+Figure~\ref{fig:rep_grid} presents a $3 \times 3$ grid of rank-versus-complexity curves, one panel for each $(\beta, p_{\mathrm{self}})$ configuration, using the same fitted complexity axis (Eq.~\ref{eq:complexity}) for comparability with direct democracy.
+
+\textbf{Preservation of regime structure.} At $(\beta = 0,\, p_{\mathrm{self}} = 0)$ (policy-based voting with altruistic delegates) the rank-versus-complexity curves most closely resemble direct democracy. Multiple methods compete across the complexity axis, and the progression from simple to sophisticated methods is visible. This configuration represents ideal representation: voters evaluate candidates on policy merit, and candidates faithfully serve their constituencies.
+
+\textbf{Collapse under selfishness.} As $p_{\mathrm{self}}$ increases (moving rightward in the grid), the rank curves become increasingly chaotic. At $p_{\mathrm{self}} = 1$, no method clearly dominates at any complexity level; the rank curves cross repeatedly and erratically, with no stable ordering. Self-interested representatives introduce noise that overwhelms the complexity-dependent signal: the proposals implemented reflect individual self-interest rather than any aggregation of collective preferences, rendering the choice of voting method effectively random in its consequences.
+
+\textbf{Collapse under identity voting.} As $\beta$ increases (moving downward), method differentiation also decreases, though less severely than under high $p_{\mathrm{self}}$. At $\beta = 1$, voters elect representatives based on shared traits rather than policy outcomes. The resulting representatives may share their constituents' circumstances but do not necessarily champion their preferred policies, reducing the signal available to the voting method.
+
+\textbf{The worst case.} The $(\beta = 1,\, p_{\mathrm{self}} = 1)$ corner (identity voting with self-interested trustees) produces the least differentiated rank curves. Here, representatives are elected for who they are, not what they propose, and then implement whatever benefits themselves. The voting method becomes largely irrelevant: it cannot compensate for a representation layer that discards both policy information (high $\beta$) and constituency alignment (high $p_{\mathrm{self}}$).
+
+\subsubsection{Delegate Advantage}
+
+The delegate model ($p_{\mathrm{self}} = 0$) consistently outperforms the trustee model ($p_{\mathrm{self}} = 1$) in mean fitness when $\alpha > 0$, with the largest gaps at mid-$\alpha$ and high $K$. At $K = 10$, $\alpha = 0.5$, the delegate advantage is 1.39 mean fitness units (best-method fitness of 3.45 vs.\ 2.04). At $K = 20$, $\alpha = 0.5$, the delegate model more than doubles collective welfare (1.82 vs.\ 0.78). At $\alpha = 0$, the advantage vanishes entirely; on landscapes with no cross-dependency, self-interest and constituency welfare coincide.
+
+\subsubsection{The $\beta$--$\alpha$ Interaction}
+
+Identity-based voting ($\beta = 1$) underperforms policy-based voting ($\beta = 0$) most severely at mid-$\alpha$. At $K = 10$, $\alpha = 0.5$, the penalty is 1.57 fitness units (best-method fitness of 3.45 under $\beta = 0$ vs.\ 1.88 under $\beta = 1$). At $\alpha = 0$, the three $\beta$ values converge exactly: individual traits carry no policy information, so identity voting is pure noise but harmless noise. At $\alpha = 1$, the $\beta$ values nearly converge: traits fully mediate policy effects, making identity similarity a reasonable proxy for policy alignment.
+
+\begin{figure*}[!b]
+  \centering
+  \includegraphics[width=0.95\textwidth]{rep_rank_vs_complexity_grid.pdf}
+  \caption{Mean rank vs.\ complexity for all nine methods across the $3 \times 3$ $(\beta, p_{\mathrm{self}})$ grid. Rows vary $\beta$ (identity weight: 0, 0.5, 1); columns vary $p_{\mathrm{self}}$ (candidate selfishness: 0, 0.5, 1). Representation reshapes the regime structure: high $p_{\mathrm{self}}$ produces chaotic rankings; high $\beta$ favors simpler methods.}
+  \label{fig:rep_grid}
+\end{figure*}

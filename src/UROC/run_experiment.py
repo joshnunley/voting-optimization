@@ -42,11 +42,17 @@ def parse_args():
     p.add_argument("--iterations", type=int, default=100)
     p.add_argument("--seed", type=int, default=0,
                    help="Base seed for reproducibility")
+    p.add_argument("--save_distributions", action="store_true", default=False,
+                   help="Save full per-run fitness distributions (large files)")
     # Representative democracy
     p.add_argument("--num_candidates", type=int, default=None,
                    help="Number of candidates (None = direct democracy)")
     p.add_argument("--selection_temperature", type=float, default=None,
                    help="Softmax temperature for candidate selection")
+    p.add_argument("--beta", type=float, default=0.0,
+                   help="Identity weight: 0=policy voting, 1=Hamming/identity voting")
+    p.add_argument("--p_self", type=float, default=1.0,
+                   help="Candidate selfishness: 0=delegate (constituency), 1=trustee (self)")
     return p.parse_args()
 
 
@@ -74,33 +80,37 @@ def build_initial_solutions(N, num_solutions, voting_portion, seed):
 def run_single(args):
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # Build initial state (deterministic from base seed)
-    initial_solutions, vote_indices, non_vote_indices = build_initial_solutions(
-        args.N, args.num_solutions, args.voting_portion, args.seed
-    )
-
-    # Build NK landscape with cross-dependency
-    np.random.seed(args.seed + 1000)
-    nk = NKLandscape(args.N, args.K)
-
-    if args.alpha > 0 and args.K > 0:
-        dep_matrix = NKLandscape.build_split_dependency_matrix(
-            args.N, args.K, vote_indices, non_vote_indices, args.alpha
-        )
-        nk.set_dependency_matrix(dep_matrix)
-
-    # Storage: summary stats + full fitness distributions
-    mean_history = np.zeros((args.runs, args.iterations))
+    # Storage: summary stats across all runs
+    mean_history     = np.zeros((args.runs, args.iterations))
     variance_history = np.zeros((args.runs, args.iterations))
-    min_history = np.zeros((args.runs, args.iterations))
-    max_history = np.zeros((args.runs, args.iterations))
-    # Full distributions: (runs, iterations, num_solutions) - may shrink as solutions merge
-    # Store as list of arrays since num_solutions can change
+    min_history      = np.zeros((args.runs, args.iterations))
+    max_history      = np.zeros((args.runs, args.iterations))
     fitness_distributions = []
 
     for run in range(args.runs):
-        # Each run gets a unique seed for the voting stochasticity,
-        # but same landscape and initial solutions
+        # Each run gets its own landscape, initial population, and voting seed.
+        # Seed scheme (all derived from base seed + run offset):
+        #   run * 10000 + 0    → initial solutions and bit-index partition
+        #   run * 10000 + 1000 → NK landscape (fitness table + dependency matrix)
+        #   run * 10000 + 2000 → voting stochasticity
+
+        # Fresh initial solutions and voting/non-voting index partition
+        initial_solutions, vote_indices, non_vote_indices = build_initial_solutions(
+            args.N, args.num_solutions, args.voting_portion,
+            args.seed + run * 10000
+        )
+
+        # Fresh NK landscape
+        np.random.seed(args.seed + run * 10000 + 1000)
+        nk = NKLandscape(args.N, args.K)
+
+        if args.K > 0:
+            dep_matrix = NKLandscape.build_split_dependency_matrix(
+                args.N, args.K, vote_indices, non_vote_indices, args.alpha
+            )
+            nk.set_dependency_matrix(dep_matrix)
+
+        # Fresh voting seed
         np.random.seed(args.seed + run * 10000 + 2000)
 
         vote = VoteModel(
@@ -111,6 +121,8 @@ def run_single(args):
             vote_type=args.vote_type,
             num_candidates=args.num_candidates,
             selection_temperature=args.selection_temperature,
+            beta=args.beta,
+            p_self=args.p_self,
         )
 
         run_distributions = []
@@ -120,31 +132,28 @@ def run_single(args):
                 vote.step()
 
             fitnesses = vote.get_fitnesses()
-            mean_history[run, it] = np.mean(fitnesses)
+            mean_history[run, it]     = np.mean(fitnesses)
             variance_history[run, it] = np.var(fitnesses)
-            min_history[run, it] = np.min(fitnesses)
-            max_history[run, it] = np.max(fitnesses)
-            run_distributions.append(fitnesses.copy())
+            min_history[run, it]      = np.min(fitnesses)
+            max_history[run, it]      = np.max(fitnesses)
+            if args.save_distributions:
+                run_distributions.append(fitnesses.copy())
 
-        fitness_distributions.append(run_distributions)
+        if args.save_distributions:
+            fitness_distributions.append(run_distributions)
         print(f"{args.vote_type} K={args.K} a={args.alpha} run={run}/{args.runs}",
               flush=True)
 
-    # Save results
-    np.save(os.path.join(args.output_dir, "mean_history.npy"), mean_history)
+    # Save summary statistics
+    np.save(os.path.join(args.output_dir, "mean_history.npy"),     mean_history)
     np.save(os.path.join(args.output_dir, "variance_history.npy"), variance_history)
-    np.save(os.path.join(args.output_dir, "min_history.npy"), min_history)
-    np.save(os.path.join(args.output_dir, "max_history.npy"), max_history)
+    np.save(os.path.join(args.output_dir, "min_history.npy"),      min_history)
+    np.save(os.path.join(args.output_dir, "max_history.npy"),      max_history)
 
-    # Save distributions as object array (variable-length per iteration)
-    np.save(os.path.join(args.output_dir, "fitness_distributions.npy"),
-            np.array(fitness_distributions, dtype=object),
-            allow_pickle=True)
-
-    # Save initial state and metadata
-    np.save(os.path.join(args.output_dir, "initial_solutions.npy"), initial_solutions)
-    np.save(os.path.join(args.output_dir, "fitness_mapping.npy"), nk.get_fitness_mapping())
-    np.save(os.path.join(args.output_dir, "dependency_matrix.npy"), nk.get_dependency_matrix())
+    if args.save_distributions:
+        np.save(os.path.join(args.output_dir, "fitness_distributions.npy"),
+                np.array(fitness_distributions, dtype=object),
+                allow_pickle=True)
 
     metadata = {
         "N": args.N, "K": args.K, "alpha": args.alpha,
@@ -153,8 +162,11 @@ def run_single(args):
         "num_solutions": args.num_solutions,
         "runs": args.runs, "iterations": args.iterations,
         "seed": args.seed,
+        "stochastic_landscape": True,
         "num_candidates": args.num_candidates,
         "selection_temperature": args.selection_temperature,
+        "beta": args.beta,
+        "p_self": args.p_self,
         "democracy": "representative" if args.num_candidates else "direct",
     }
     with open(os.path.join(args.output_dir, "metadata.json"), "w") as f:
