@@ -32,6 +32,13 @@ traits mediate all policy effects but lack complex internal structure. At
 $\alpha \approx 0.5$, both are present, creating the highest effective
 complexity.
 
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{rank_vs_complexity_stacked.pdf}
+  \caption{Mean fitness rank (top) and variance rank (bottom) vs.\ fitted complexity $K_0/20$. The progression Total Score $\to$ Scoring ($p\!=\!0.35$) $\to$ Borda $\to$ STAR is visible for efficiency; both Borda and Scoring ($p\!=\!0.35$) dominate equity.}
+  \label{fig:rank_vs_complexity}
+\end{figure}
+
 \subsection{Voting Process}
 
 At each time step, the system selects $V$ bit positions uniformly at random from
@@ -76,7 +83,8 @@ plus one member of a generalized scoring family:
     selected. Serves as a baseline.
   \item \textbf{Scoring ($p\!=\!0.35$)}: A positional scoring rule where rank~$k$
     (out of $n$) receives score $((n\!-\!1\!-\!k)/(n\!-\!1))^{0.35}$. This is a
-    member of the power-law scoring family that interpolates between
+    member of the family of positional scoring rules \citep{saari1995geometry}
+    that interpolates between
     antiplurality ($p \to 0$) and plurality ($p \to \infty$), with Borda at
     $p=1$. At $p=0.35$, the rule is flatter than Borda, assigning substantial
     weight across the ranking while remaining purely ordinal. This exponent was
@@ -109,17 +117,19 @@ where $\beta \in [0,1]$ is the \emph{identity weight} and both components are
 normalized to $[0,1]$. The same voting method used in direct democracy then
 elects a winning candidate whose platform is implemented.
 
-The $(\beta, p_{\mathrm{self}})$ plane nests four interpretable limiting cases:
+The $(\beta, p_{\mathrm{self}})$ plane nests four limiting cases.
+Rows: election type (policy vs.\ identity) $\times$ platform type
+(constituency vs.\ self-interested):
 
 \begin{center}
 \begin{tabular}{lll}
 \toprule
 Model & $\beta$ & $p_{\mathrm{self}}$ \\
 \midrule
-Trustee (policy election, self-interested) & 0 & 1 \\
-Delegate (policy election, constituency)   & 0 & 0 \\
-Identity-trustee (identity election, self-interested) & 1 & 1 \\
-Identity-delegate (identity election, constituency)   & 1 & 0 \\
+Trustee        & 0 & 1 \\
+Delegate       & 0 & 0 \\
+Identity-trustee  & 1 & 1 \\
+Identity-delegate & 1 & 0 \\
 \bottomrule
 \end{tabular}
 \end{center}
